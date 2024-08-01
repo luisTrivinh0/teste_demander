@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TreeMap de Crescimento de Assinantes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .treemap {
+            width: 100%;
+            height: 600px;
+            display: flex;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        .treemap div {
+            box-sizing: border-box;
+            border: 1px solid #fff;
+            text-align: center;
+            color: #fff;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <h1>TreeMap de Crescimento de Assinantes</h1>
+    <div class="treemap" id="treemap"></div>
+
+    <script>
+        const data = [
+            { name: 'Netflix', growth: 15 },
+            { name: 'Amazon Prime', growth: 10 },
+            { name: 'Disney+', growth: 25 },
+            { name: 'HBO Max', growth: -5 },
+            { name: 'Hulu', growth: 8 },
+            { name: 'Apple TV+', growth: -2 },
+            { name: 'Paramount+', growth: 12 },
+            { name: 'Peacock', growth: 7 },
+            { name: 'Discovery+', growth: 5 },
+            { name: 'YouTube Premium', growth: 20 }
+        ];
+
+        const treemapContainer = document.getElementById('treemap');
+
+        // Calcular a área total
+        const totalGrowth = data.reduce((sum, platform) => sum + Math.abs(platform.growth), 0);
+
+        // Função para desenhar um item como quadrado
+        function drawItem(platform, width, height, x, y) {
+            const div = document.createElement('div');
+            const size = Math.sqrt((Math.abs(platform.growth) / totalGrowth) * 600 * 600);
+            div.style.width = `${size}px`;
+            div.style.height = `${size}px`;
+            div.style.left = `${x}px`;
+            div.style.top = `${y}px`;
+            div.style.backgroundColor = platform.growth >= 0 ? '#6B8E23' : '#FF0000'; // Tom oliva para positivo, vermelho para negativo
+            div.textContent = `${platform.name}: ${platform.growth}%`;
+            treemapContainer.appendChild(div);
+        }
+
+        // Organizar os itens em quadrados
+        function organizeItems() {
+            let x = 0;
+            let y = 0;
+            let rowHeight = 0;
+            let containerWidth = treemapContainer.clientWidth;
+            let containerHeight = treemapContainer.clientHeight;
+            const maxItemsPerRow = Math.floor(containerWidth / 100); // Supondo que o tamanho mínimo de um quadrado seja 100px
+            let itemsInRow = 0;
+
+            data.forEach(platform => {
+                const itemWidth = Math.sqrt((Math.abs(platform.growth) / totalGrowth) * 600 * 600);
+                if (x + itemWidth > containerWidth) {
+                    x = 0;
+                    y += rowHeight;
+                    rowHeight = 0;
+                    itemsInRow = 0;
+                }
+
+                if (y + itemWidth > containerHeight) {
+                    return; // Não há mais espaço disponível
+                }
+
+                drawItem(platform, itemWidth, itemWidth, x, y);
+                x += itemWidth;
+                rowHeight = Math.max(rowHeight, itemWidth);
+                itemsInRow++;
+            });
+        }
+
+        // Desenhar o gráfico quando a página carrega
+        window.onload = organizeItems;
+    </script>
+</body>
+</html>
